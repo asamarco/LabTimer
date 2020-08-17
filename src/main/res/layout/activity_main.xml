@@ -15,6 +15,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:hapticFeedbackEnabled="true"
         tools:context=".MainActivity">
 
         <TextView
@@ -37,6 +38,7 @@
             style="@style/buttons"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="8dp"
+            android:hapticFeedbackEnabled="true"
             android:longClickable="true"
             android:onClick="addMinute"
             android:text="M"
@@ -52,6 +54,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
+            android:hapticFeedbackEnabled="true"
             android:onClick="addSecond"
             android:text="S"
             android:textSize="24sp"
@@ -69,6 +72,7 @@
             android:layout_height="68dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="32dp"
+            android:hapticFeedbackEnabled="true"
             android:onClick="startStop"
             android:text="START"
             android:textSize="18sp"
