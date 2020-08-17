@@ -48,7 +48,7 @@ class TimerViewModel : ViewModel() {
 
             override fun onFinish() {
                 eventTimeFinished.value=true
-                timerState = TimerState.Stopped
+                //timerState = TimerState.Stopped
             }
 
         }
@@ -65,12 +65,13 @@ class TimerViewModel : ViewModel() {
 
     fun resetTimer () {
         currentTime.value = timerLenght
-        timerState = TimerState.Stopped
-        timer.cancel()
+        //timerState = TimerState.Stopped
+        if (this::timer.isInitialized) timer.cancel()
     }
 
     fun clearTimer () {
         timerLenght = 0
+        timerState = TimerState.Stopped
         resetTimer()
     }
     override fun onCleared() {
