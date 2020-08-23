@@ -36,7 +36,15 @@ class TimerViewModel : ViewModel() {
         DateUtils.formatElapsedTime(time)
     })
 
-    fun startTimer () {
+    fun startStop() {
+        when (timerState.value) {
+            TimerState.Running -> stopTimer()
+            TimerState.Stopped -> startTimer()
+            TimerState.Finished -> stopTimer()
+        }
+    }
+
+    private fun startTimer () {
         var tick = 1L
 
         if (timerLenght == 0L) {timerLenght= Long.MAX_VALUE/1000; tick = -1L} //Runup timer
@@ -59,7 +67,7 @@ class TimerViewModel : ViewModel() {
         timer.start()
     }
 
-    fun stopTimer () {
+    private fun stopTimer () {
         if (this::timer.isInitialized) timer.cancel()
         timerLenght = currentTime.value ?:0
         timerState.value = TimerState.Stopped

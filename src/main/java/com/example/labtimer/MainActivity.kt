@@ -7,7 +7,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 import android.view.HapticFeedbackConstants
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -60,14 +59,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-    }
-
-    fun startStop(view: View) {
-        when (viewModel.timerState.value) {
-            TimerState.Running -> viewModel.stopTimer()
-            TimerState.Stopped -> viewModel.startTimer()
-            TimerState.Finished -> viewModel.stopTimer()
-        }
     }
 
 

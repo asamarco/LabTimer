@@ -75,7 +75,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="32dp"
             android:hapticFeedbackEnabled="true"
-            android:onClick="startStop"
+            android:onClick="@{() -> timerViewModel.startStop()}"
             android:text="@string/start"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
