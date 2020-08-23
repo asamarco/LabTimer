@@ -2,6 +2,7 @@ package com.example.labtimer
 
 import android.os.CountDownTimer
 import android.text.format.DateUtils
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
@@ -29,10 +30,7 @@ class TimerViewModel : ViewModel() {
 
     fun addTime (time: Long){
         currentTime.value = currentTime.value!!.plus(time)
-        if (timerState == TimerState.Stopped) timerLenght += time
-        else {
-            stopTimer()
-        }
+        stopTimer()
     }
 
     val currentTimeString = Transformations.map (currentTime,{ time ->
@@ -40,10 +38,16 @@ class TimerViewModel : ViewModel() {
     })
 
     fun startTimer () {
+        var tick = 1L
+
+        if (timerLenght == 0L) {timerLenght= Long.MAX_VALUE/1000; tick = -1L} //Runup timer
+        Log.i("labtimer", "timerLength = $timerLenght")
+
         timer = object : CountDownTimer(timerLenght*1000, ONE_SECOND) {
 
             override fun onTick(millisUntilFinished: Long) {
-                currentTime.value = currentTime.value?.minus(ONE_SECOND/1000)
+                currentTime.value = currentTime.value?.minus(tick)
+                //Log.i("labtimer", "currenTime = $currentTime.value")
             }
 
             override fun onFinish() {
@@ -58,7 +62,7 @@ class TimerViewModel : ViewModel() {
     }
 
     fun stopTimer () {
-        timer.cancel()
+        if (this::timer.isInitialized) timer.cancel()
         timerLenght = currentTime.value ?:0
         timerState = TimerState.Stopped
     }
