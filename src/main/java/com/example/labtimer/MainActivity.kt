@@ -33,79 +33,41 @@ class MainActivity : AppCompatActivity() {
         binding.timerViewModel = viewModel
         binding.setLifecycleOwner { this.lifecycle }
         window.decorView.rootView.isHapticFeedbackEnabled = true
-        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
 
-
-
-
-        viewModel.eventTimeFinished.observe(this, Observer {Done ->
-            if (Done) {
-                viewModel.eventTimeFinished.value=false
-                buzz(CORRECT_BUZZ_PATTERN)
-                viewModel.resetTimer()
+        viewModel.timerState.observe(this, Observer { state ->
+            Log.i("labtimer", "State: $state")
+            when (state) {
+                TimerState.Finished -> {
+                    buzz(CORRECT_BUZZ_PATTERN)
+                    viewModel.resetTimer()
+                }
+                TimerState.Stopped -> {
+                    binding.startButton.text = getString(R.string.start)
+                    if (this::vibrator.isInitialized) vibrator.cancel()
+                }
+                TimerState.Running -> {
+                    binding.startButton.text = getString(R.string.stop)
+                }
+                else -> Log.i("labtimer","What the hell")
             }
         })
 
 
-
-        binding.secondButton.setOnLongClickListener {
-            addTime(10)
-            binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-            true
-        }
-        binding.minuteButton.setOnLongClickListener {
-            addTime(600)
-            binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-            true
-        }
-
         binding.startButton.setOnLongClickListener {
             viewModel.clearTimer()
-            binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+            binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
             true
         }
 
 
     }
 
-    fun addTime (time: Long) {
-        viewModel.addTime(time)
-        stop()
-        Log.i("labtimer", "add Time $time")
-    }
-
-
-    fun add10Minutes () {
-        addTime(600)
-    }
-
-    fun addMinute (view: View) {
-        addTime(60)
-    }
-
-    fun add10Seconds () {
-       addTime(10)
-    }
-
-    fun addSecond (view: View) {
-        addTime(1)
-    }
-
-    fun startStop (view: View) {
-        if(viewModel.timerState == TimerState.Stopped) {
-            viewModel.startTimer()
-            binding.startButton.text = "STOP"
+    fun startStop(view: View) {
+        when (viewModel.timerState.value) {
+            TimerState.Running -> viewModel.stopTimer()
+            TimerState.Stopped -> viewModel.startTimer()
+            TimerState.Finished -> viewModel.stopTimer()
         }
-        else {
-            viewModel.stopTimer()
-            stop()
-
-        }
-    }
-
-    private fun stop() {
-        binding.startButton.text = "START"
-        if (this::vibrator.isInitialized) vibrator.cancel()
     }
 
 

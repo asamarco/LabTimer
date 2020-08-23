@@ -10,27 +10,26 @@ import androidx.lifecycle.ViewModel
 const val ONE_SECOND = 1000L
 
 enum class TimerState{
-    Stopped, Paused, Running
+    Stopped, Finished, Running
 }
 
 class TimerViewModel : ViewModel() {
 
     lateinit var timer: CountDownTimer
     var currentTime = MutableLiveData<Long>()
-    var eventTimeFinished = MutableLiveData<Boolean>()
+    var timerState = MutableLiveData<TimerState>()
 
-
-
-    var timerState: TimerState = TimerState.Stopped
     private var timerLenght: Long = 0
 
     init {
         currentTime.value = 0
+        timerState.value = TimerState.Stopped
     }
 
-    fun addTime (time: Long){
+    fun addTime (time: Long) : Boolean {
         currentTime.value = currentTime.value!!.plus(time)
         stopTimer()
+        return true //needed for onLongClick handling
     }
 
     val currentTimeString = Transformations.map (currentTime,{ time ->
@@ -51,20 +50,19 @@ class TimerViewModel : ViewModel() {
             }
 
             override fun onFinish() {
-                eventTimeFinished.value=true
-                //timerState = TimerState.Stopped
+                timerState.value=TimerState.Finished
             }
 
         }
 
-        timerState = TimerState.Running
+        timerState.value = TimerState.Running
         timer.start()
     }
 
     fun stopTimer () {
         if (this::timer.isInitialized) timer.cancel()
         timerLenght = currentTime.value ?:0
-        timerState = TimerState.Stopped
+        timerState.value = TimerState.Stopped
     }
 
     fun resetTimer () {
@@ -75,7 +73,7 @@ class TimerViewModel : ViewModel() {
 
     fun clearTimer () {
         timerLenght = 0
-        timerState = TimerState.Stopped
+        timerState.value = TimerState.Stopped
         resetTimer()
     }
     override fun onCleared() {

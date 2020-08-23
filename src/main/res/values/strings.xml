@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">LabTimer</string>
+    <string name="stop">STOP</string>
+    <string name="start">START</string>
+    <string name="second">S</string>
+    <string name="minute">M</string>
 </resources>
