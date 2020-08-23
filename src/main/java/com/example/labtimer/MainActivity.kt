@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -45,13 +46,15 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+
+
         binding.secondButton.setOnLongClickListener {
-            add10Seconds()
+            addTime(10)
             binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
             true
         }
         binding.minuteButton.setOnLongClickListener {
-            add10Minutes()
+            addTime(600)
             binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
             true
         }
@@ -65,21 +68,27 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun addTime (time: Long) {
+        viewModel.addTime(time)
+        stop()
+        Log.i("labtimer", "add Time $time")
+    }
+
+
     fun add10Minutes () {
-        viewModel.addTime(600)
+        addTime(600)
     }
 
     fun addMinute (view: View) {
-        viewModel.addTime(60)
+        addTime(60)
     }
 
     fun add10Seconds () {
-
-        viewModel.addTime(10)
+       addTime(10)
     }
 
     fun addSecond (view: View) {
-        viewModel.addTime(1)
+        addTime(1)
     }
 
     fun startStop (view: View) {
@@ -89,10 +98,14 @@ class MainActivity : AppCompatActivity() {
         }
         else {
             viewModel.stopTimer()
-            binding.startButton.text = "START"
-            if (this::vibrator.isInitialized) vibrator.cancel()
+            stop()
 
         }
+    }
+
+    private fun stop() {
+        binding.startButton.text = "START"
+        if (this::vibrator.isInitialized) vibrator.cancel()
     }
 
 
