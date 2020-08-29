@@ -52,9 +52,9 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-        binding.startButton.setOnLongClickListener {
+        binding.timerText.setOnLongClickListener {
             viewModel.clearTimer()
-            binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            binding.timerText.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
             true
         }
 
