@@ -33,12 +33,13 @@ class MainActivity : AppCompatActivity() {
         binding.setLifecycleOwner { this.lifecycle }
         window.decorView.rootView.isHapticFeedbackEnabled = true
 
-        viewModel.timerState.observe(this, Observer { state ->
+        TimerUtils.timerState.observe(this, Observer { state ->
             Log.i("labtimer", "State: $state")
             when (state) {
                 TimerState.Finished -> {
+                    binding.startButton.text = getString(R.string.stop)
                     buzz(CORRECT_BUZZ_PATTERN)
-                    viewModel.resetTimer()
+                    TimerUtils.resetTimer()
                 }
                 TimerState.Stopped -> {
                     binding.startButton.text = getString(R.string.start)
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.timerText.setOnLongClickListener {
-            viewModel.clearTimer()
+            TimerUtils.clearTimer()
             binding.timerText.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
             true
         }
@@ -77,15 +78,16 @@ class MainActivity : AppCompatActivity() {
         AlarmUtils.removeAlarm( this)
         if (alarmSetTime > 0) {
             val remainingTime = (alarmSetTime - AlarmUtils.now()) / 1000
-            viewModel.resumeTimer(remainingTime)
+            TimerUtils.resumeTimer(remainingTime)
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if (viewModel.timerState.value == TimerState.Running) {
-            AlarmUtils.setAlarm(this, viewModel.currentTime.value!!)
-            viewModel.timer.cancel()
+        if (TimerUtils.timerState.value == TimerState.Running) {
+            AlarmUtils.setAlarm(this, TimerUtils.secondsRemaining())
+            TimerUtils.timer.cancel()
+            Log.i("labtimer","Paused, Alarm Set")
         }
     }
 

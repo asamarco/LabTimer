@@ -9,14 +9,11 @@ import java.util.*
 
 class AlarmUtils {
     companion object{
-
-
-
         fun setAlarm(context: Context, secondsRemaining: Long){
 
             val alarmTime = now() + secondsRemaining*1000
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context,TimerExpiredReceiver::class.java)
+            val intent = Intent(context, TimerExpiredReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(context,0, intent, 0)
 
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent)
@@ -24,7 +21,7 @@ class AlarmUtils {
         }
 
         fun removeAlarm(context: Context){
-            val intent = Intent(context, TimerExpiredReceiver::class.java)
+            val intent = Intent(context,TimerExpiredReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -48,8 +45,6 @@ class AlarmUtils {
         fun now (): Long{
             return Calendar.getInstance().timeInMillis
         }
-
     }
-
 
 }
