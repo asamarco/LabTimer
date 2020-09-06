@@ -16,7 +16,7 @@ enum class TimerState{
 class TimerViewModel : ViewModel() {
 
     lateinit var timer: CountDownTimer
-    var currentTime = MutableLiveData<Long>()
+    var currentTime = MutableLiveData<Long>() //seconds
     var timerState = MutableLiveData<TimerState>()
 
     private var timerLenght: Long = 0
@@ -54,7 +54,6 @@ class TimerViewModel : ViewModel() {
 
             override fun onTick(millisUntilFinished: Long) {
                 currentTime.value = currentTime.value?.minus(tick)
-                //Log.i("labtimer", "currenTime = $currentTime.value")
             }
 
             override fun onFinish() {
@@ -84,6 +83,15 @@ class TimerViewModel : ViewModel() {
         timerState.value = TimerState.Stopped
         resetTimer()
     }
+
+    fun resumeTimer(remainingTime: Long) {
+        val holder = timerLenght
+        timerLenght=remainingTime
+        currentTime.value = timerLenght
+        startTimer()
+        timerLenght=holder
+    }
+
     override fun onCleared() {
         super.onCleared()
         timer.cancel()

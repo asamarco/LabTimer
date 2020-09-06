@@ -57,8 +57,6 @@ class MainActivity : AppCompatActivity() {
             binding.timerText.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
             true
         }
-
-
     }
 
 
@@ -70,6 +68,24 @@ class MainActivity : AppCompatActivity() {
             } else {
                 vibrator.vibrate(1000) // Vibrate method for below API Level 26
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val alarmSetTime = AlarmUtils.getAlarmTime(this)
+        AlarmUtils.removeAlarm( this)
+        if (alarmSetTime > 0) {
+            val remainingTime = (alarmSetTime - AlarmUtils.now()) / 1000
+            viewModel.resumeTimer(remainingTime)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (viewModel.timerState.value == TimerState.Running) {
+            AlarmUtils.setAlarm(this, viewModel.currentTime.value!!)
+            viewModel.timer.cancel()
         }
     }
 
