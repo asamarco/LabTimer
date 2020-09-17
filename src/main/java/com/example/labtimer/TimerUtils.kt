@@ -14,7 +14,8 @@ class TimerUtils {
         var currentTime = MutableLiveData<Long>() //seconds
         var timerState = MutableLiveData<TimerState>()
         lateinit var timer: CountDownTimer
-        private var timerLenght: Long = 0
+        var timerLength: Long = 0
+        var progress = MutableLiveData<Int>()
 
         init {
             currentTime.value = 0
@@ -26,14 +27,15 @@ class TimerUtils {
         fun startTimer () {
             var tick = 1L
 
-            if (timerLenght == 0L) {
-                timerLenght= UPPER_TIME_LIMIT; tick = -1L} //Runup timer
-            Log.i("labtimer", "timerLength = $timerLenght")
+            if (timerLength == 0L) {
+                timerLength= UPPER_TIME_LIMIT; tick = -1L} //Runup timer
+            Log.i("labtimer", "timerLength = $timerLength")
 
-            timer = object : CountDownTimer(timerLenght*1000, ONE_SECOND) {
+            timer = object : CountDownTimer(timerLength*1000, ONE_SECOND) {
 
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime.value = currentTime.value?.minus(tick)
+                    progress.value = progress(timerLength, currentTime.value!!)
                 }
 
                 override fun onFinish() {
@@ -46,41 +48,46 @@ class TimerUtils {
             timer.start()
         }
 
+        private fun progress (length: Long, remainingTime: Long): Int {
+            return ((length-remainingTime)*100/length).toInt()
+        }
+
         fun stopTimer () {
             if (this::timer.isInitialized) timer.cancel()
-            timerLenght = currentTime.value ?:0
+            timerLength = currentTime.value ?:0
             timerState.value = TimerState.Stopped
         }
 
         fun resetTimer () {
-            currentTime.value = timerLenght
+            currentTime.value = timerLength
             //timerState = TimerState.Stopped
             if (this::timer.isInitialized) timer.cancel()
         }
 
         fun clearTimer () {
-            timerLenght = 0
+            timerLength = 0
             timerState.value = TimerState.Stopped
             resetTimer()
         }
 
         fun secondsRemaining () : Long {
-            if (timerLenght == UPPER_TIME_LIMIT) return UPPER_TIME_LIMIT - currentTime.value!!
+            if (timerLength == UPPER_TIME_LIMIT) return UPPER_TIME_LIMIT - currentTime.value!!
             else return currentTime.value!!
         }
 
-        fun resumeTimer(remainingTime: Long) {
-            Log.i("labtimer","timerlength = $timerLenght, remainingTime = $remainingTime")
-            if (timerLenght != UPPER_TIME_LIMIT) {
-                val holder = timerLenght
-                timerLenght = remainingTime
-                currentTime.value = timerLenght
+        fun resumeTimer(remainingTime: Long, timerLengthStored: Long) {
+            timerLength=timerLengthStored
+            Log.i("labtimer","timerlength = $timerLength, remainingTime = $remainingTime")
+            if (timerLength != UPPER_TIME_LIMIT) {
+                val holder = timerLength
+                timerLength = remainingTime
+                currentTime.value = timerLength
                 startTimer()
-                timerLenght = holder
+                timerLength = holder
             }
             else { //runup timer
                 Log.i("labtimer","runup")
-                timerLenght = 0L
+                timerLength = 0L
                 startTimer()
                 currentTime.value= UPPER_TIME_LIMIT-remainingTime
             }

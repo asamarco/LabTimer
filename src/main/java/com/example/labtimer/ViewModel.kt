@@ -5,7 +5,6 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.example.labtimer.TimerUtils.Companion.timerState
 
-const val ONE_SECOND = 1000L
 
 
 class TimerViewModel : ViewModel() {
@@ -15,6 +14,8 @@ class TimerViewModel : ViewModel() {
     val currentTimeString = Transformations.map (TimerUtils.currentTime) { time ->
         DateUtils.formatElapsedTime(time)
     }
+
+    val progress = TimerUtils.progress
 
     fun startStop() {
         when (timerState.value) {

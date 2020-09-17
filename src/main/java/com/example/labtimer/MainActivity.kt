@@ -75,17 +75,19 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val alarmSetTime = AlarmUtils.getAlarmTime(this)
+        val timerLengthSaved = AlarmUtils.getAlarmLength(this)
+        Log.i("labtimer", "timerLenghtSaved = $timerLengthSaved")
         AlarmUtils.removeAlarm( this)
         if (alarmSetTime > 0) {
             val remainingTime = (alarmSetTime - AlarmUtils.now()) / 1000
-            TimerUtils.resumeTimer(remainingTime)
+            TimerUtils.resumeTimer(remainingTime, timerLengthSaved)
         }
     }
 
     override fun onPause() {
         super.onPause()
         if (TimerUtils.timerState.value == TimerState.Running) {
-            AlarmUtils.setAlarm(this, TimerUtils.secondsRemaining())
+            AlarmUtils.setAlarm(this, TimerUtils.secondsRemaining(), TimerUtils.timerLength)
             TimerUtils.timer.cancel()
             Log.i("labtimer","Paused, Alarm Set")
         }
