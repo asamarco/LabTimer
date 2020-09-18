@@ -13,7 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.labtimer.databinding.ActivityMainBinding
 
-private val CORRECT_BUZZ_PATTERN = longArrayOf(500, 100, 100, 100, 100, 100)
+private val CORRECT_BUZZ_PATTERN = longArrayOf(0, 100, 100, 100, 100, 100, 500)
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 TimerState.Stopped -> {
                     binding.startButton.text = getString(R.string.start)
+                    binding.progressBar.progress = 0
                     if (this::vibrator.isInitialized) vibrator.cancel()
                 }
                 TimerState.Running -> {
