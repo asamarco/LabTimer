@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        var lastClickTime = 0L
+
         viewModel = ViewModelProvider(this).get(TimerViewModel::class.java)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -62,6 +64,32 @@ class MainActivity : AppCompatActivity() {
         binding.timerText.setOnLongClickListener {
             TimerUtils.clearTimer()
             binding.timerText.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            true
+        }
+
+        binding.minuteButton.setOnLongClickListener {
+            val now = AlarmUtils.now()
+
+            if (now - lastClickTime < AppConstants.DOUBLE_CLICK_TIME){
+                TimerUtils.clearTimer()
+                binding.minuteButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            }
+            else viewModel.addTime(600)
+
+            lastClickTime = now
+            true
+        }
+
+        binding.secondButton.setOnLongClickListener {
+            val now = AlarmUtils.now()
+
+            if (now - lastClickTime < AppConstants.DOUBLE_CLICK_TIME){
+                TimerUtils.clearTimer()
+                binding.secondButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            }
+            else viewModel.addTime(10)
+
+            lastClickTime = now
             true
         }
     }
