@@ -3,7 +3,9 @@ package com.example.labtimer
 import android.text.format.DateUtils
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.example.labtimer.TimerUtils.Companion.timerState
+import com.example.labtimer.utils.TimerState
+import com.example.labtimer.utils.TimerUtils
+import com.example.labtimer.utils.TimerUtils.Companion.timerState
 
 
 

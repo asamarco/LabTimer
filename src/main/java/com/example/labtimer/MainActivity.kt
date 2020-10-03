@@ -11,9 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.labtimer.AppConstants.Companion.BUZZ_PATTERN
 import com.example.labtimer.databinding.ActivityMainBinding
+import com.example.labtimer.utils.AlarmUtils
+import com.example.labtimer.utils.NotificationUtils
+import com.example.labtimer.utils.TimerState
+import com.example.labtimer.utils.TimerUtils
 
-private val CORRECT_BUZZ_PATTERN = longArrayOf(0, 100, 100, 100, 100, 100, 500)
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,8 +42,9 @@ class MainActivity : AppCompatActivity() {
             when (state) {
                 TimerState.Finished -> {
                     binding.startButton.text = getString(R.string.stop)
-                    buzz(CORRECT_BUZZ_PATTERN)
+                    buzz(BUZZ_PATTERN)
                     TimerUtils.resetTimer()
+                    binding.progressBar.progress=100
                 }
                 TimerState.Stopped -> {
                     binding.startButton.text = getString(R.string.start)
@@ -60,7 +65,6 @@ class MainActivity : AppCompatActivity() {
             true
         }
     }
-
 
     private fun buzz(pattern: LongArray) {
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -83,6 +87,12 @@ class MainActivity : AppCompatActivity() {
             val remainingTime = (alarmSetTime - AlarmUtils.now()) / 1000
             TimerUtils.resumeTimer(remainingTime, timerLengthSaved)
         }
+        if (TimerUtils.timerState.value == TimerState.Finished){
+            NotificationUtils.hideTimerNotification(this)
+            TimerUtils.resetTimer()
+            TimerUtils.stopTimer()
+        }
+
     }
 
     override fun onPause() {

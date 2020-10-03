@@ -1,4 +1,4 @@
-package com.example.labtimer
+package com.example.labtimer.utils
 
 import android.os.CountDownTimer
 import android.util.Log
@@ -22,16 +22,14 @@ class TimerUtils {
             timerState.value = TimerState.Stopped
         }
 
-
-
         fun startTimer () {
             var tick = 1L
 
             if (timerLength == 0L) {
-                timerLength= UPPER_TIME_LIMIT; tick = -1L} //Runup timer
+                timerLength = UPPER_TIME_LIMIT; tick = -1L} //Runup timer
             Log.i("labtimer", "timerLength = $timerLength")
 
-            timer = object : CountDownTimer(timerLength*1000, ONE_SECOND) {
+            timer = object : CountDownTimer(timerLength *1000, ONE_SECOND) {
 
                 override fun onTick(millisUntilFinished: Long) {
                     currentTime.value = currentTime.value?.minus(tick)
@@ -39,7 +37,7 @@ class TimerUtils {
                 }
 
                 override fun onFinish() {
-                    timerState.value=TimerState.Finished
+                    timerState.value= TimerState.Finished
                 }
 
             }
@@ -60,7 +58,6 @@ class TimerUtils {
 
         fun resetTimer () {
             currentTime.value = timerLength
-            //timerState = TimerState.Stopped
             if (this::timer.isInitialized) timer.cancel()
         }
 
@@ -76,7 +73,7 @@ class TimerUtils {
         }
 
         fun resumeTimer(remainingTime: Long, timerLengthStored: Long) {
-            timerLength=timerLengthStored
+            timerLength =timerLengthStored
             Log.i("labtimer","timerlength = $timerLength, remainingTime = $remainingTime")
             if (timerLength != UPPER_TIME_LIMIT) {
                 val holder = timerLength
@@ -89,7 +86,7 @@ class TimerUtils {
                 Log.i("labtimer","runup")
                 timerLength = 0L
                 startTimer()
-                currentTime.value= UPPER_TIME_LIMIT-remainingTime
+                currentTime.value= UPPER_TIME_LIMIT -remainingTime
             }
 
         }

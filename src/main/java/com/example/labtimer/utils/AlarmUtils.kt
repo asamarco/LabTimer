@@ -1,10 +1,11 @@
-package com.example.labtimer
+package com.example.labtimer.utils
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.preference.PreferenceManager
+import com.example.labtimer.receivers.TimerExpiredReceiver
 import java.util.*
 
 
@@ -25,7 +26,7 @@ class AlarmUtils {
         }
 
         fun removeAlarm(context: Context){
-            val intent = Intent(context,TimerExpiredReceiver::class.java)
+            val intent = Intent(context, TimerExpiredReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
