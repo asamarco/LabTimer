@@ -14,7 +14,7 @@ class TimerUtils {
         var currentTime = MutableLiveData<Long>() //seconds
         var timerState = MutableLiveData<TimerState>()
         lateinit var timer: CountDownTimer
-        var timerLength: Long = 0
+        var timerLength: Long = 0 //milliseconds
         var progress = MutableLiveData<Int>()
 
         init {
@@ -23,10 +23,11 @@ class TimerUtils {
         }
 
         fun startTimer () {
-            var tick = 1L
+            var tick = 1L //+1 for countdown timer, -1 for runup timer
+            timerLength = currentTime.value ?:0
 
-            if (timerLength == 0L) {
-                timerLength = UPPER_TIME_LIMIT; tick = -1L} //Runup timer
+            if (timerLength == 0L) { // starts runup timer
+                timerLength = UPPER_TIME_LIMIT; tick = -1L}
             Log.i("labtimer", "timerLength = $timerLength")
 
             timer = object : CountDownTimer(timerLength *1000, ONE_SECOND) {
@@ -52,11 +53,10 @@ class TimerUtils {
 
         fun stopTimer () {
             if (this::timer.isInitialized) timer.cancel()
-            timerLength = currentTime.value ?:0
             timerState.value = TimerState.Stopped
         }
 
-        fun resetTimer () {
+        fun resetTimer () {//recall the stored timer length without stopping
             currentTime.value = timerLength
             if (this::timer.isInitialized) timer.cancel()
         }
@@ -73,14 +73,14 @@ class TimerUtils {
         }
 
         fun resumeTimer(remainingTime: Long, timerLengthStored: Long) {
-            timerLength =timerLengthStored
+            timerLength = timerLengthStored
             Log.i("labtimer","timerlength = $timerLength, remainingTime = $remainingTime")
-            if (timerLength != UPPER_TIME_LIMIT) {
+            if (timerLength != UPPER_TIME_LIMIT) {//countdown timer
                 val holder = timerLength
                 timerLength = remainingTime
                 currentTime.value = timerLength
                 startTimer()
-                timerLength = holder
+                timerLength = holder //stores the original timerlength so that it can be recalled later with resetTimer
             }
             else { //runup timer
                 Log.i("labtimer","runup")

@@ -30,14 +30,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var lastClickTime = 0L
+        var lastClickTime = 0L // to record the last click action of M/S buttons
 
         viewModel = ViewModelProvider(this).get(TimerViewModel::class.java)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.timerViewModel = viewModel
         binding.setLifecycleOwner { this.lifecycle }
-        window.decorView.rootView.isHapticFeedbackEnabled = true
+        window.decorView.rootView.isHapticFeedbackEnabled = true //not sure if really needed
+
 
         TimerUtils.timerState.observe(this, Observer { state ->
             Log.i("labtimer", "State: $state")
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                     binding.startButton.text = getString(R.string.stop)
                     buzz(BUZZ_PATTERN)
                     TimerUtils.resetTimer()
-                    binding.progressBar.progress=100
+                    binding.progressBar.progress=100 //needed if the finished state is triggered from outside the app
                 }
                 TimerState.Stopped -> {
                     binding.startButton.text = getString(R.string.start)
@@ -60,6 +61,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        //short clicks are handled with data binding in the activity xml file
+        //long click of the timer display or of both M and S clear the timer
 
         binding.timerText.setOnLongClickListener {
             TimerUtils.clearTimer()
@@ -109,8 +112,10 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         val alarmSetTime = AlarmUtils.getAlarmTime(this)
         val timerLengthSaved = AlarmUtils.getAlarmLength(this)
+
         Log.i("labtimer", "timerLenghtSaved = $timerLengthSaved")
         AlarmUtils.removeAlarm( this)
+
         if (alarmSetTime > 0) {
             val remainingTime = (alarmSetTime - AlarmUtils.now()) / 1000
             TimerUtils.resumeTimer(remainingTime, timerLengthSaved)
@@ -125,6 +130,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+
         if (TimerUtils.timerState.value == TimerState.Running) {
             AlarmUtils.setAlarm(this, TimerUtils.secondsRemaining(), TimerUtils.timerLength)
             TimerUtils.timer.cancel()
