@@ -44,13 +44,13 @@ class LabTimerWidget : AppWidgetProvider() {
         if (timerMap[appWidgetId] == null) timerMap[appWidgetId] = defaultTimer
         // Construct the RemoteViews object
         val views: RemoteViews
-        val isCountDownTimer = timerMap[appWidgetId]!!.timerLength > 500L //might fail if display is 0 but 0<timerLength<500, see if >500 should be used instead
+        val isCountDownTimer = timerMap[appWidgetId]!!.timerLength > 500L //check with == 0 would produce counterintuitive behavior if 00:00 on screen hides something != 0 behind
         val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
 
 
         val minWidth= options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-        val maxWidth= options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
-        val minHeigth= options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+        //val maxWidth= options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+        //val minHeigth= options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
         val maxHeigth= options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
 
         //Define the view according to the widget size on screen
@@ -71,11 +71,16 @@ class LabTimerWidget : AppWidgetProvider() {
         val timeTarget: Long
         // The rounding to seconds create some artifacts, offset time provides a workaround. 00:00 still remains for two seconds on display in a countdown timer
         timeTarget = if(isCountDownTimer)
-            SystemClock.elapsedRealtime() + AppConstants.OFFSET_TIME + (timerMap[appWidgetId]!!.timerLength ?:0)
+            SystemClock.elapsedRealtime() + AppConstants.OFFSET_TIME + (timerMap[appWidgetId]!!.timerLength)
         else
-            SystemClock.elapsedRealtime() - AppConstants.OFFSET_TIME + (timerMap[appWidgetId]!!.timerLength ?:0)
+            SystemClock.elapsedRealtime() - AppConstants.OFFSET_TIME + (timerMap[appWidgetId]!!.timerLength)
 
         timerMap[appWidgetId]!!.target = timeTarget
+
+        if (timerMap[appWidgetId]!!.running)
+            views.setTextViewText(R.id.widget_start_button,context.getString(R.string.stop))
+        else
+            views.setTextViewText(R.id.widget_start_button,context.getString(R.string.start))
 
         with(views){
             setChronometerCountDown(R.id.widgetTimerText, isCountDownTimer)
@@ -123,9 +128,22 @@ class LabTimerWidget : AppWidgetProvider() {
             val appWidgetId = intent.getIntExtra(AppConstants.ID_EXTRA, AppWidgetManager.INVALID_APPWIDGET_ID)
             val time = intent.getIntExtra(AppConstants.TIME_EXTRA, 0)
             Log.i("intent","Id $appWidgetId, time $time")
+            val timerExpired = (timerMap[appWidgetId]!!.target < SystemClock.elapsedRealtime())
 
+            if (timerExpired and timerMap[appWidgetId]!!.running) //If the time is zero or negative restores original timer setpoint
+            {
+                stopWidgetTimer(appWidgetId, timerMap[appWidgetId]!!.timerLength)
+                timerMap[appWidgetId]!!.running = false
+                updateAppWidget(context!!,AppWidgetManager.getInstance(context),appWidgetId)
+                return
+            }
             if (time == AppConstants.START){
-                timerMap[appWidgetId]?.running = timerMap[appWidgetId]?.running?.not() ?:false
+                if (timerMap[appWidgetId]!!.running) {
+                        stopWidgetTimer(appWidgetId)
+                    timerMap[appWidgetId]!!.running = false
+                }
+                else
+                    timerMap[appWidgetId]!!.running = true
             }
             else {
                 val now = AlarmUtils.now()
