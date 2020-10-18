@@ -4,4 +4,5 @@
     <string name="start">START</string>
     <string name="second">S</string>
     <string name="minute">M</string>
+    <string name="add_widget">Add widget</string>
 </resources>
