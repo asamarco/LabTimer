@@ -84,7 +84,7 @@ class LabTimerWidget : AppWidgetProvider() {
 
         with(views){
             setChronometerCountDown(R.id.widgetTimerText, isCountDownTimer)
-            setChronometer(R.id.widgetTimerText, timeTarget,null,timerMap[appWidgetId]?.running ?:false)
+            setChronometer(R.id.widgetTimerText, timeTarget,null,timerMap[appWidgetId]!!.running)
 
             setOnClickPendingIntent(R.id.widget_minute_button, getPendingIntent(context, appWidgetId, AppConstants.MINUTE))
             setOnClickPendingIntent(R.id.widget_second_button, getPendingIntent(context, appWidgetId, AppConstants.SECOND))
@@ -128,6 +128,8 @@ class LabTimerWidget : AppWidgetProvider() {
             val appWidgetId = intent.getIntExtra(AppConstants.ID_EXTRA, AppWidgetManager.INVALID_APPWIDGET_ID)
             val time = intent.getIntExtra(AppConstants.TIME_EXTRA, 0)
             Log.i("intent","Id $appWidgetId, time $time")
+
+            if (timerMap[appWidgetId] == null) timerMap[appWidgetId] = defaultTimer
             val timerExpired = (timerMap[appWidgetId]!!.target < SystemClock.elapsedRealtime())
 
             if (timerExpired and timerMap[appWidgetId]!!.running) //If the time is zero or negative restores original timer setpoint
@@ -142,8 +144,10 @@ class LabTimerWidget : AppWidgetProvider() {
                         stopWidgetTimer(appWidgetId)
                     timerMap[appWidgetId]!!.running = false
                 }
-                else
+                else {
                     timerMap[appWidgetId]!!.running = true
+                    //TODO: implement alarm notification
+                }
             }
             else {
                 val now = AlarmUtils.now()
