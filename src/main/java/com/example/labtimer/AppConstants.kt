@@ -19,5 +19,7 @@ class AppConstants {
         const val TIME_EXTRA = "TIME"
         const val ID_EXTRA = "ID"
 
+        const val MAIN_ACTIVITY = 0
+
     }
 }

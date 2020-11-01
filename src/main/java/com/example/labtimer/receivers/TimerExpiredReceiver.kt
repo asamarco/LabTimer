@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Vibrator
 import android.util.Log
+import com.example.labtimer.AppConstants
 import com.example.labtimer.utils.AlarmUtils
 import com.example.labtimer.utils.NotificationUtils
 import com.example.labtimer.utils.TimerState
@@ -18,10 +19,16 @@ class TimerExpiredReceiver : BroadcastReceiver() {
             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibrator.vibrate(1000) // Vibrate method for below API Level 26
         }
-        NotificationUtils.showTimerExpired(context)
-        AlarmUtils.setAlarmTime(0, 0, context)
-        Log.i("labtimer","Broadcast received")
-        TimerUtils.timerState.value = TimerState.Finished
+
+        val caller = intent.getIntExtra(AppConstants.ID_EXTRA,0)
+        Log.i("labtimer","Broadcast received from caller $caller")
+
+        NotificationUtils.showTimerExpired(context,caller)
+
+        if (caller == AppConstants.MAIN_ACTIVITY) {
+            AlarmUtils.setAlarmTime(0, 0, context)
+            TimerUtils.timerState.value = TimerState.Finished
+        }
     }
 
 

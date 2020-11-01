@@ -10,27 +10,27 @@ import android.graphics.Color
 import android.media.AudioAttributes
 import android.os.Build
 import android.provider.Settings
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.labtimer.AppConstants
 import com.example.labtimer.MainActivity
 import com.example.labtimer.R
 import com.example.labtimer.receivers.TimerNotificationActionReceiver
 
+//notifications are identified by the caller index, of value MAIN_ACTIVITY for the app and corresponding to appWidgetId for appwidgets
+
 class NotificationUtils {
     companion object {
         private const val CHANNEL_ID_TIMER = "menu_timer"
         private const val CHANNEL_NAME_TIMER = "LabTimer Alarm"
-        private const val TIMER_ID = 0
 
-
-        @RequiresApi(Build.VERSION_CODES.O)
-        fun showTimerExpired(context: Context){
+        fun showTimerExpired(context: Context, caller: Int){
             val stopIntent = Intent(context, TimerNotificationActionReceiver::class.java)
             stopIntent.action = AppConstants.ACTION_STOP
+            stopIntent.putExtra(AppConstants.ID_EXTRA, caller)
+
             val startPendingIntent = PendingIntent.getBroadcast(
                 context,
-                0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                caller, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT
             )
 
             val nBuilder = NotificationCompat.Builder(context, CHANNEL_ID_TIMER)
@@ -39,23 +39,26 @@ class NotificationUtils {
                 .setSmallIcon(R.drawable.notification_icon)
                 .setAutoCancel(true)
                 .setOngoing(true)
-                .setContentIntent(getPendingIntentWithStack(context, MainActivity::class.java))
                 .addAction(R.drawable.stop_icon, "STOP", startPendingIntent)
                 .setColor(context.getColor(R.color.colorPrimary))
-                .setUsesChronometer(true)
 
+
+            if (caller == AppConstants.MAIN_ACTIVITY) {
+                nBuilder.setContentIntent(getPendingIntentWithStack(context, MainActivity::class.java))
+                    .setUsesChronometer(true)
+            }
 
             val nManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             nManager.createNotificationChannel(CHANNEL_ID_TIMER, CHANNEL_NAME_TIMER, true)
 
-            nManager.notify(TIMER_ID, nBuilder.build())
+            nManager.notify(caller, nBuilder.build())
 
     }
 
-        fun hideTimerNotification(context: Context){
+        fun hideTimerNotification(context: Context,caller: Int){
             val nManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nManager.cancel(TIMER_ID)
+            nManager.cancel(caller)
         }
 
         private fun <T> getPendingIntentWithStack(context: Context, javaClass: Class<T>): PendingIntent{

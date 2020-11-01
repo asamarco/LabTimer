@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             TimerUtils.resumeTimer(remainingTime, timerLengthSaved)
         }
         if (TimerUtils.timerState.value == TimerState.Finished){
-            NotificationUtils.hideTimerNotification(this)
+            NotificationUtils.hideTimerNotification(this, AppConstants.MAIN_ACTIVITY)
             TimerUtils.resetTimer()
             TimerUtils.stopTimer()
         }

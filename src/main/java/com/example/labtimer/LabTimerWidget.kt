@@ -17,6 +17,7 @@ import com.example.labtimer.WidgetTimer.Companion.lastClickTime
 import com.example.labtimer.WidgetTimer.Companion.stopWidgetTimer
 import com.example.labtimer.WidgetTimer.Companion.timerMap
 import com.example.labtimer.utils.AlarmUtils
+import com.example.labtimer.utils.NotificationUtils
 
 /**
  * Implementation of App Widget functionality.
@@ -25,7 +26,7 @@ import com.example.labtimer.utils.AlarmUtils
 
 
 class LabTimerWidget : AppWidgetProvider() {
-
+    companion object {
     //Define the intent by the unique identifier of ID*value, each button/widgetID combination should use separate broadcast channels
     private fun getPendingIntent(context: Context, widgetId: Int, value: Int): PendingIntent {
         //Log.i("intent","getPendingIntent ID=$widgetId")
@@ -36,7 +37,7 @@ class LabTimerWidget : AppWidgetProvider() {
         return PendingIntent.getBroadcast(context, widgetId*value, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
-    private fun updateAppWidget(
+    fun updateAppWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
@@ -95,7 +96,7 @@ class LabTimerWidget : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
         Log.i("intent","WIDGET ID = $appWidgetId")
     }
-
+}
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -132,26 +133,39 @@ class LabTimerWidget : AppWidgetProvider() {
             if (timerMap[appWidgetId] == null) timerMap[appWidgetId] = defaultTimer
             val timerExpired = (timerMap[appWidgetId]!!.target < SystemClock.elapsedRealtime())
 
-            if (timerExpired and timerMap[appWidgetId]!!.running) //If the time is zero or negative restores original timer setpoint
+            //Whatever it has been pressed, if the time is zero or negative restores original timer setpoint and removes notification if still there
+            if (timerExpired and timerMap[appWidgetId]!!.running)
             {
                 stopWidgetTimer(appWidgetId, timerMap[appWidgetId]!!.timerLength)
                 timerMap[appWidgetId]!!.running = false
                 updateAppWidget(context!!,AppWidgetManager.getInstance(context),appWidgetId)
+                NotificationUtils.hideTimerNotification(context,appWidgetId)
                 return
             }
+
             if (time == AppConstants.START){
                 if (timerMap[appWidgetId]!!.running) {
-                        stopWidgetTimer(appWidgetId)
+                    stopWidgetTimer(appWidgetId)
+                    AlarmUtils.removeAlarm(context!!, appWidgetId)
                     timerMap[appWidgetId]!!.running = false
                 }
                 else {
                     timerMap[appWidgetId]!!.running = true
-                    //TODO: implement alarm notification
+                    if (timerMap[appWidgetId]!!.timerLength != 0L) {
+                        val secondsRemaining = timerMap[appWidgetId]!!.timerLength / 1000 //timerMap[appWidgetId]!!.target - SystemClock.elapsedRealtime()
+                        AlarmUtils.setAlarm(
+                            context!!,
+                            secondsRemaining,
+                            timerMap[appWidgetId]!!.timerLength,
+                            appWidgetId
+                        )
+                    }
                 }
             }
             else {
-                val now = AlarmUtils.now()
+                AlarmUtils.removeAlarm(context!!, appWidgetId)
 
+                val now = AlarmUtils.now()
                 if (now - lastClickTime < AppConstants.DOUBLE_CLICK_TIME)
                     clearWidgetTimer(appWidgetId)
                 else {
