@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -28,13 +29,27 @@ import com.example.labtimer.utils.NotificationUtils
 class LabTimerWidget : AppWidgetProvider() {
     companion object {
     //Define the intent by the unique identifier of ID*value, each button/widgetID combination should use separate broadcast channels
-    private fun getPendingIntent(context: Context, widgetId: Int, value: Int): PendingIntent {
-        //Log.i("intent","getPendingIntent ID=$widgetId")
-        val intent = Intent(context, LabTimerWidget::class.java)
-        intent.action = AppConstants.ADD_TIME_INTENT
-        intent.putExtra(AppConstants.ID_EXTRA, widgetId)
-        intent.putExtra(AppConstants.TIME_EXTRA, value)
-        return PendingIntent.getBroadcast(context, widgetId*value, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    private fun getPendingIntent(context: Context, widgetId: Int, value: Int, action: String): PendingIntent {
+        val intent = Intent(context, LabTimerWidget::class.java).apply {
+            this.action = action
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId) // Standard extra for widget ID
+            if (action == AppConstants.ADD_TIME_INTENT) {
+                putExtra(AppConstants.TIME_EXTRA, value)
+            }
+            // For ACTION_WIDGET_TOGGLE_TIMER, 'value' might not be strictly needed from here,
+            // as the action itself is specific.
+        }
+
+        val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
+        // Ensure unique request codes for different actions or values if necessary.
+        // A combination of widgetId, action hash, and value can ensure uniqueness.
+        val requestCode = widgetId * 1000 + action.hashCode() + value
+        return PendingIntent.getBroadcast(context, requestCode, intent, pendingIntentFlags)
     }
 
     fun updateAppWidget(
@@ -83,11 +98,12 @@ class LabTimerWidget : AppWidgetProvider() {
 
         with(views){
             setChronometerCountDown(R.id.widgetTimerText, isCountDownTimer)
-            setChronometer(R.id.widgetTimerText, timeTarget,null,timerMap[appWidgetId]!!.running)
 
-            setOnClickPendingIntent(R.id.widget_minute_button, getPendingIntent(context, appWidgetId, AppConstants.MINUTE))
-            setOnClickPendingIntent(R.id.widget_second_button, getPendingIntent(context, appWidgetId, AppConstants.SECOND))
-            setOnClickPendingIntent(R.id.widget_start_button, getPendingIntent(context, appWidgetId, AppConstants.START))
+            setChronometer(R.id.widgetTimerText, timeTarget,null,timerMap[appWidgetId]!!.running)
+            Log.i("intent","SET ID = $appWidgetId")
+            setOnClickPendingIntent(R.id.widget_minute_button, getPendingIntent(context, appWidgetId, AppConstants.MINUTE, AppConstants.ADD_TIME_INTENT))
+            setOnClickPendingIntent(R.id.widget_second_button, getPendingIntent(context, appWidgetId, AppConstants.SECOND, AppConstants.ADD_TIME_INTENT))
+            setOnClickPendingIntent(R.id.widget_start_button, getPendingIntent(context, appWidgetId, AppConstants.START, AppConstants.ADD_TIME_INTENT))
         }
 
         // Instruct the widget manager to update the widget
@@ -124,7 +140,7 @@ class LabTimerWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         if (intent?.action == AppConstants.ADD_TIME_INTENT) {
-            val appWidgetId = intent.getIntExtra(AppConstants.ID_EXTRA, AppWidgetManager.INVALID_APPWIDGET_ID)
+            val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             val time = intent.getIntExtra(AppConstants.TIME_EXTRA, 0)
             Log.i("intent","Id $appWidgetId, time $time")
 
