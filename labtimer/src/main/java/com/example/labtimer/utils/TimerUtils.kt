@@ -85,6 +85,7 @@ class TimerUtils {
             else { //runup timer
                 Log.i("labtimer","runup")
                 timerLength = 0L
+                currentTime.value= 0L
                 startTimer()
                 currentTime.value= UPPER_TIME_LIMIT -remainingTime
             }
